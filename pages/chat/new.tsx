@@ -6,8 +6,6 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import SvgIcon from "../../components/Core/SvgIcon";
-import { fetchUserProfile, UserProfile } from "../api/auth/user";
-
 
 interface Chat {
   id: string;
@@ -49,22 +47,21 @@ useEffect(() => {
   } else {
     setIsAuthenticated(true);
 
-fetchUserProfile(token)
-  .then((data: UserProfile) => {
-    const capitalize = (str: string) =>
-      str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-    const firstName = capitalize(data.first_name);
-    const lastInitial = data.last_name ? `${capitalize(data.last_name).charAt(0)}.` : "";
-    
-    setUser({
-      name: `Abebech`.trim(),
-      avatar: data.profile_picture || "/Group.png",
-    });
+  fetch("/api/auth/user", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   })
-  .catch((err) => {
-    console.error("Profile fetch error:", err);
-    setUser({ name: "Guest User", avatar: "/Group.png" });
-  });
+    .then(res => res.json())
+    .then(data => setUser({
+      name: `${data.first_name} ${data.last_name?.charAt(0) || ''}.`,
+      avatar: data.profile_picture || "/Group.png",
+    }))
+    .catch(err => {
+      console.error("Profile fetch error:", err);
+      setUser({ name: "Guest User", avatar: "/Group.png" });
+    });
+
 }
 }, [router]);
 
