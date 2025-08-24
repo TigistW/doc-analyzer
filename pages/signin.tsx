@@ -156,36 +156,42 @@ export default function SignIn() {
               {/* Google login */}
               {/* ✅ Google Login Button */}
     <GoogleLogin
-      onSuccess={async (credentialResponse) => {
-        try {
-          const token = credentialResponse.credential;
+  onSuccess={async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential;
 
-          // Send Google token to backend
-          const res = await fetch("http://196.190.220.63:8000/auth/google-login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ google_token: token }),
-          });
+      // Call your Next.js API instead of backend directly
+      const res = await fetch("/api/auth/googleLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ google_token: token }),
+      });
 
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.message || "Google login failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Google login failed");
 
-          // Save tokens
-          localStorage.setItem("access_token", data.access_token);
-          localStorage.setItem("refresh_token", data.refresh_token);
+      // Save tokens
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
 
-          // Redirect based on role
-          if (data.role === "admin") {
-            router.push("/admin/dashboard-page");
-          } else {
-            router.push("/chat/new");
-          }
-        } catch (err: any) {
-          setError(err.message);
-        }
-      }}
-      onError={() => setError("Google login failed")}
-    />
+      // // Optionally fetch user profile using your fetchUserProfile helper
+      // const profile = await fetchUserProfile(data.access_token);
+      // setUser(profile);
+      // setIsAuthenticated(true);
+
+      // Redirect based on role
+      if (data.role === "admin") {
+        router.push("/admin/dashboard-page");
+      } else {
+        router.push("/chat/new");
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }}
+  onError={() => setError("Google login failed")}
+/>
+
             </div>
           </div>
 
