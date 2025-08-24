@@ -3,8 +3,8 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaMoon, FaRegSun } from "react-icons/fa";
-import { FiSettings } from "react-icons/fi";
+import { FaMoon, FaRegSun } from "@tabler/icons-react";
+import { FiSettings } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { GoogleLogin } from "@react-oauth/google";
 

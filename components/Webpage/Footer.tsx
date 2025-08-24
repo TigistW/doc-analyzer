@@ -1,5 +1,5 @@
 import React from "react";
-import { FaTwitter, FaDribbble, FaLinkedin } from "react-icons/fa";
+import { FaTwitter, FaDribbble, FaLinkedin } from "@tabler/icons-react";
 import { IconType } from "react-icons";
 
 
@@ -60,9 +60,7 @@ const Footer: React.FC = () => {
 
           {/* Center: Social Icons */}
        <div className="flex justify-center gap-6">
-            <a href="#"><FaTwitter size={20} /></a>
-            <a href="#"><FaLinkedin size={20} /></a>
-            <a href="#"><FaDribbble size={20} /></a>
+          
             </div>
 
           {/* Right */}

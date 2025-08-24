@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiLogOut } from "react-icons/fi";
-import { FaUserCircle } from "react-icons/fa";
-import { HiHome } from "react-icons/hi";
-import { FiDatabase, FiUsers } from "react-icons/fi";
+import { FiLogOut } from "@tabler/icons-react";
+import { FaUserCircle } from "@tabler/icons-react";
+// import { HiHome } from "react-icons/hi";
+import { HiHome } from "@tabler/icons-react";
+
+import { FiDatabase, FiUsers } from "@tabler/icons-react";
 
 export default function Sidebar() {
   const pathname = usePathname();

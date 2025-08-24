@@ -5,10 +5,10 @@ import { PluggableList } from "unified";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FiPlus, FiSearch } from "react-icons/fi";
-import { FaRegUserCircle } from "react-icons/fa";
-import { FiZap, FiCheckCircle, FiAlertTriangle, FiMessageSquare,FiLogOut} from "react-icons/fi";
-import { FaMoon, FaInfoCircle } from "react-icons/fa";
+import { FiPlus, FiSearch } from "@tabler/icons-react";
+import { FaRegUserCircle } from "@tabler/icons-react";
+import { FiZap, FiCheckCircle, FiAlertTriangle, FiMessageSquare,FiLogOut} from "@tabler/icons-react";
+import { FaMoon, FaInfoCircle } from "@tabler/icons-react";
 
 
 interface Chat {
@@ -102,7 +102,7 @@ const handleLogout = () => {
     if (!input.trim()) return;
 
   // Add user message to state
-    const newMessage: Message = { role: "user", content: input };
+    const newMessage: Message = { id: crypto.randomUUID(), role: "user", content: input };
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
@@ -117,7 +117,7 @@ const handleLogout = () => {
       const data = await res.json();
 
       // Add model's response
-      const modelMessage: Message = { role: "model", content: data.reply };
+      const modelMessage: Message = { id: crypto.randomUUID(), role: "model", content: data.reply };
       setMessages((prev) => [...prev, modelMessage]);
     } catch (err) {
       console.error("Error sending message:", err);
@@ -180,7 +180,7 @@ const handleLogout = () => {
       onClick={() => setMessages([])}
       className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-blue-400 text-white font-medium rounded-full hover:bg-blue-700 transition"
     >
-      <FiPlus className="w-5 h-5" /> New chat
+      {<FiPlus className="w-5 h-5" /> as JSX.Element} New chat
     </button>
 
   </div>

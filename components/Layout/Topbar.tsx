@@ -1,5 +1,5 @@
 "use client";
-import { FiBell, FiMoon, FiSun } from "react-icons/fi";
+import { FiBell, FiMoon, FiSun } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 interface User {
@@ -28,7 +28,7 @@ export default function Topbar() {
         onClick={() => setDark(!dark)}
         className="w-10 h-10 pl-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-300 transition"
         >
-        {dark ? <FiSun /> : <FiMoon />}
+        {dark ? <FiSun /> as JSX.Element : <FiMoon /> as JSX.Element}
         </button>
        {/* User avatar */}
             {user?.profilePicture ? (
