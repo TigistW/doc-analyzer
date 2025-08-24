@@ -1,12 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FiLogOut } from "@tabler/icons-react";
-import { FaUserCircle } from "@tabler/icons-react";
-// import { HiHome } from "react-icons/hi";
-import { HiHome } from "@tabler/icons-react";
-
-import { FiDatabase, FiUsers } from "@tabler/icons-react";
+import { usePathname } from "next/navigation"; // path depends on your structure
+import SvgIcon from "../Core/SvgIcon";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -36,31 +31,25 @@ export default function Sidebar() {
             {pathname === "/admin/dashboard-page" && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-md"></span>
             )}
-            <HiHome className="text-lg" />
+            <SvgIcon src="/Icon.svg" size={18} />
             <span>Dashboard</span>
           </Link>
 
           {/* Data Management */}
-          <Link
-            href="/admin/data-management-page"
-            className={linkClasses("/admin/data-management-page")}
-          >
+          <Link href="/admin/data-management-page" className={linkClasses("/admin/data-management-page")}>
             {pathname === "/admin/data-management-page" && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-md"></span>
             )}
-            <FiDatabase className="text-lg" />
+            <SvgIcon src="/Icon.svg" size={18} />
             <span>Data Management</span>
           </Link>
 
           {/* User Management */}
-          <Link
-            href="/admin/user-management-page"
-            className={linkClasses("/admin/user-management-page")}
-          >
+          <Link href="/admin/user-management-page" className={linkClasses("/admin/user-management-page")}>
             {pathname === "/admin/user-management-page" && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-md"></span>
             )}
-            <FiUsers className="text-lg" />
+            <SvgIcon src="/Icon.svg" size={18} />
             <span>User Management</span>
           </Link>
         </div>
@@ -87,7 +76,7 @@ export default function Sidebar() {
           className="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600"
         >
           <div className="flex items-center space-x-2">
-            <FaUserCircle />
+            <SvgIcon src="/Icon.svg" size={18} />
             <span>My Profile</span>
           </div>
           <span className="text-gray-400">›</span>
@@ -95,7 +84,8 @@ export default function Sidebar() {
 
         {/* Log Out */}
         <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-red-500">
-          <FiLogOut /> <span>Log Out</span>
+          <SvgIcon src="/Icon.svg" size={18} /> 
+          <span>Log Out</span>
         </button>
       </div>
     </aside>

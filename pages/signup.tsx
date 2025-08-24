@@ -4,11 +4,9 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaMoon, FaRegSun } from "@tabler/icons-react";
-import { FiSettings } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { profile } from "console";
-
+import SvgIcon from "@/components/Core/SvgIcon";
 export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -88,14 +86,18 @@ export default function SignUp() {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 rounded-full bg-gray-100 transition"
             >
-              {theme === "dark" ? (
-                <FaRegSun className="text-yellow-400" />
-              ) : (
-                <FaMoon className="text-gray-600" />
-              )}
+              <SvgIcon
+                src={theme === "dark" ? "/Icon.svg" : "/Icon.svg"}
+                size={24}
+                className="p-2 rounded-full bg-gray-100 cursor-pointer"
+              />
             </button>
             <button className="p-2 rounded-full bg-gray-100">
-              <FiSettings className="text-gray-600" />
+            <SvgIcon
+              src="/Icon.svg"
+              size={24}
+              className="p-2 rounded-full bg-gray-100 cursor-pointer"
+            />
             </button>
           </div>
 

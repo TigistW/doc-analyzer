@@ -1,6 +1,7 @@
 // components/Hero.tsx
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import Link from "next/link";
+import SvgIcon from "../Core/SvgIcon";
+
 export default function Hero() {
   return (
     <div className="bg-white">
@@ -13,21 +14,21 @@ export default function Hero() {
             <span className="text-lg font-semibold text-gray-800">eAMR Connect</span>
           </div>
 
-{/* Actions */}
-<div className="flex items-center space-x-3">
-        <Link
-            href="/signin"
-            className="px-4 py-2 rounded-lg border border-blue-500 text-blue-500 hover:bg-blue-50 transition"
-        >
-            Sign In
-        </Link>
-        <Link
-            href="/signup"
-            className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
-        >
-            Sign Up
-        </Link>
-        </div>
+          {/* Actions */}
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/signin"
+              className="px-4 py-2 rounded-lg border border-blue-500 text-blue-500 hover:bg-blue-50 transition"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
+            >
+              Sign Up
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -64,7 +65,7 @@ export default function Hero() {
               className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition"
             >
               Try the Demo
-              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+              <SvgIcon src="/Icon.svg" size={16} />
             </a>
           </div>
         </div>
@@ -74,7 +75,7 @@ export default function Hero() {
           <img
             src="/Logo.svg"
             alt="Hero Illustration"
-            className="w-full h-auto rounded-lg shadow-lg h-1200 w-120"
+            className="w-full h-auto rounded-lg shadow-lg"
           />
         </div>
       </section>

@@ -5,10 +5,7 @@ import { PluggableList } from "unified";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FiPlus, FiSearch } from "@tabler/icons-react";
-import { FaRegUserCircle } from "@tabler/icons-react";
-import { FiZap, FiCheckCircle, FiAlertTriangle, FiMessageSquare,FiLogOut} from "@tabler/icons-react";
-import { FaMoon, FaInfoCircle } from "@tabler/icons-react";
+import SvgIcon from "../../components/Core/SvgIcon";
 
 
 interface Chat {
@@ -102,7 +99,7 @@ const handleLogout = () => {
     if (!input.trim()) return;
 
   // Add user message to state
-    const newMessage: Message = { id: crypto.randomUUID(), role: "user", content: input };
+    const newMessage: Message = {id: Date.now().toString(), role: "user", content: input };
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
@@ -117,7 +114,7 @@ const handleLogout = () => {
       const data = await res.json();
 
       // Add model's response
-      const modelMessage: Message = { id: crypto.randomUUID(), role: "model", content: data.reply };
+      const modelMessage: Message = {id: Date.now().toString(), role: "model", content: data.reply };
       setMessages((prev) => [...prev, modelMessage]);
     } catch (err) {
       console.error("Error sending message:", err);
@@ -180,7 +177,7 @@ const handleLogout = () => {
       onClick={() => setMessages([])}
       className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-blue-400 text-white font-medium rounded-full hover:bg-blue-700 transition"
     >
-      {<FiPlus className="w-5 h-5" /> as JSX.Element} New chat
+       <SvgIcon src="/Icon.svg" size={20} /> New chat
     </button>
 
   </div>
@@ -197,7 +194,7 @@ const handleLogout = () => {
               onClick={() => router.push(`/chat/${chat.id}`)}
               className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm rounded-md hover:bg-gray-100 transition"
             >
-              <FiMessageSquare className="w-4 h-4 text-gray-500" />
+               <SvgIcon src="/Icon.svg" size={16} />
               <span className="truncate">{chat.title}</span>
             </button>
           </li>
@@ -224,7 +221,7 @@ const handleLogout = () => {
             onClick={handleLogout}
             className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition"
           >
-        <FiLogOut className="w-4 h-4 text-gray-700" />
+        <SvgIcon src="/Icon.svg" size={16} />
       </button>
     </div>
 </aside>
@@ -237,11 +234,8 @@ const handleLogout = () => {
           <h2 className="text-xl font-semibold"></h2>
           
           <div className="flex items-center gap-4 bg-white shadow-md px-5 py-2 rounded-full">
-                {/* Moon icon */}
-                <FaMoon className="text-gray-500 w-5 h-5 cursor-pointer hover:text-gray-700 transition" />
-
-                {/* Info icon */}
-                <FaInfoCircle className="text-gray-500 w-5 h-5 cursor-pointer hover:text-gray-700 transition" />
+                <SvgIcon src="/Icon.svg" size={20} />
+               <SvgIcon src="/Icon.svg" size={20} />
 
                 {/* User avatar */}
                 <img
@@ -284,7 +278,7 @@ const handleLogout = () => {
               {messages.length === 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl w-full ">
                         <div className="flex flex-col items-center text-center">
-                          <FiZap className="w-4 h-4 text-blue-500 mb-3" />
+                          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-blue-500" />
                           <h3 className="text-base font-semibold mb-4">Examples</h3>
                           <div className="space-y-3 text-xs w-full">
                             <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
@@ -301,7 +295,7 @@ const handleLogout = () => {
 
                         {/* Capabilities */}
                         <div className="flex flex-col items-center text-center">
-                          <FiCheckCircle className="w-4 h-4 text-green-500 mb-3" />
+                          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-green-500" />
                           <h3 className="text-base font-semibold mb-4">Capabilities</h3>
                           <ul className="space-y-3 text-xs text-gray-600">
                             <li className="p-3 rounded-lg bg-gray-100">✔️ Provides answers as explanations to the provided query.</li>
@@ -312,7 +306,7 @@ const handleLogout = () => {
 
                         {/* Limitations */}
                         <div className="flex flex-col items-center text-center">
-                          <FiAlertTriangle className="w-4 h-4 text-yellow-500 mb-3" />
+                           <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-yellow-500" />
                           <h3 className="text-base font-semibold mb-4">Limitations</h3>
                           <ul className="space-y-3 text-xs text-gray-600">
                             <li className="p-3 rounded-lg bg-gray-100">⚠️ May occasionally generate incorrect information</li>

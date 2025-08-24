@@ -3,11 +3,9 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaMoon, FaRegSun } from "@tabler/icons-react";
-import { FiSettings } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { GoogleLogin } from "@react-oauth/google";
-
+import SvgIcon from "@/components/Core/SvgIcon";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,14 +81,18 @@ export default function SignIn() {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 transition"
             >
-              {theme === "dark" ? (
-                <FaRegSun className="text-yellow-400" />
-              ) : (
-                <FaMoon className="text-gray-600" />
-              )}
+              <SvgIcon
+                src={theme === "dark" ? "/Icon.svg" : "/Icon.svg"}
+                size={24}
+                className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 cursor-pointer"
+              />
             </button>
             <button className="p-2 rounded-full bg-gray-100 dark:bg-gray-700">
-              <FiSettings className="text-gray-600 dark:text-gray-300" />
+              <SvgIcon
+              src="/Icon.svg"
+              size={24}
+              className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 cursor-pointer"
+            />
             </button>
           </div>
 

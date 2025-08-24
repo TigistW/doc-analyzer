@@ -1,8 +1,6 @@
+"use client";
 import React from "react";
-import { FaTwitter, FaDribbble, FaLinkedin } from "@tabler/icons-react";
-import { IconType } from "react-icons";
-
-
+import SvgIcon from "../Core/SvgIcon";
 
 const Footer: React.FC = () => {
   return (
@@ -17,10 +15,14 @@ const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2 text-gray-600 text-sm">
               <li>
-                <a href="#" className="hover:underline">Home</a>
+                <a href="#" className="hover:underline">
+                  Home
+                </a>
               </li>
               <li>
-                <a href="#contactus" className="hover:underline">Contact Us</a>
+                <a href="#contactus" className="hover:underline">
+                  Contact Us
+                </a>
               </li>
             </ul>
           </div>
@@ -54,14 +56,26 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
           {/* Left */}
           <div className="flex gap-4 mb-4 md:mb-0">
-            <a href="#" className="hover:underline">Terms & Conditions</a>
-            <a href="#" className="hover:underline">Privacy Policy</a>
+            <a href="#" className="hover:underline">
+              Terms & Conditions
+            </a>
+            <a href="#" className="hover:underline">
+              Privacy Policy
+            </a>
           </div>
 
           {/* Center: Social Icons */}
-       <div className="flex justify-center gap-6">
-          
-            </div>
+          <div className="flex justify-center gap-6">
+            <a href="#">
+              <SvgIcon src="/Icon.svg" size={20} />
+            </a>
+            <a href="#">
+              <SvgIcon src="/Icon.svg" size={20} />
+            </a>
+            <a href="#">
+              <SvgIcon src="/Icon.svg" size={20} />
+            </a>
+          </div>
 
           {/* Right */}
           <p>©2025 eAMR Connect. All rights reserved.</p>

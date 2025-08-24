@@ -1,6 +1,4 @@
 import React from "react";
-import { FaBolt } from "react-icons/fa"; // you can swap icons for emojis
-import { ReactComponent as Logo } from '../../assets/Logo.svg';
 const Features: React.FC = () => {
   const features = [
     {

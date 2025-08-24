@@ -41,6 +41,8 @@ type Props = {
   users: User[];
 };
 export default function UserManagementTable({ users }: Props) {
+  // Ensure users is always an array
+  const safeUsers = users || [];
 
   const stats = {
     totalQueries: "50.8K",
@@ -68,61 +70,69 @@ export default function UserManagementTable({ users }: Props) {
         <StatsCard title="Total Data Entries" value={stats.totalDataEntries} icon={<Database />} trend="up" />
         <StatsCard title="Avg Response Time" value={stats.avgResponseTime} icon={<Clock />} trend="up" />
       </div>
-       <div className="bg-white p-4 rounded-2xl shadow mt-4 overflow-x-auto">
+
+      <div className="bg-white p-4 rounded-2xl shadow mt-4 overflow-x-auto">
         <h3 className="font-semibold mb-2">All Users</h3>
         <table className="w-full text-sm text-left border-collapse">
-        <thead>
-        <tr className="text-gray-500 border-b">
-        <th className="py-2">Name</th>
-        <th className="py-2">Phone</th>
-        <th className="py-2">Location</th>
-        <th className="py-2">No of Queries</th>
-        <th className="py-2">Status</th>
-        <th className="py-2 text-right">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {users.map((user) => (
-            <tr key={user.id} className="border-b last:border-0 hover:bg-gray-50">
-              <td className="py-2 flex items-center gap-2">
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full"
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium text-gray-500">{user.name}</span>
-                  <span className="text-xs text-gray-500">{user.email}</span>
-                </div>
-              </td>
-              <td className="py-2 text-gray-500">{user.phone}</td>
-              <td className="py-2 text-gray-500">{user.location}</td>
-              <td className="py-2 text-gray-500">{user.queries}</td>
-              <td className="py-2">
-                <span
-                  className={`px-2 py-1 text-xs rounded-full ${
-                    user.status === "Active"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {user.status}
-                </span>
-              </td>
-              <td className="py-2 flex justify-end gap-2">
-                <button className="text-blue-500 hover:text-blue-700">
-                  <Edit3 size={14} />
-                </button>
-                <button className="text-red-500 hover:text-red-700">
-                  <Trash2 size={14} />
-                </button>
-              </td>
+          <thead>
+            <tr className="text-gray-500 border-b">
+              <th className="py-2">Name</th>
+              <th className="py-2">Phone</th>
+              <th className="py-2">Location</th>
+              <th className="py-2">No of Queries</th>
+              <th className="py-2">Status</th>
+              <th className="py-2 text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {safeUsers.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-4 text-center text-gray-400">
+                  No users available
+                </td>
+              </tr>
+            ) : (
+              safeUsers.map((user) => (
+                <tr key={user.id} className="border-b last:border-0 hover:bg-gray-50">
+                  <td className="py-2 flex items-center gap-2">
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-500">{user.name}</span>
+                      <span className="text-xs text-gray-500">{user.email}</span>
+                    </div>
+                  </td>
+                  <td className="py-2 text-gray-500">{user.phone}</td>
+                  <td className="py-2 text-gray-500">{user.location}</td>
+                  <td className="py-2 text-gray-500">{user.queries}</td>
+                  <td className="py-2">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        user.status === "Active"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {user.status}
+                    </span>
+                  </td>
+                  <td className="py-2 flex justify-end gap-2">
+                    <button className="text-blue-500 hover:text-blue-700">
+                      <Edit3 size={14} />
+                    </button>
+                    <button className="text-red-500 hover:text-red-700">
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-    </div>
-    
   );
 }

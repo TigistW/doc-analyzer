@@ -1,5 +1,6 @@
+"use client";
 import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import SvgIcon from "../Core/SvgIcon";
 
 const faqs = [
   {
@@ -13,6 +14,10 @@ const faqs = [
   { question: "How does...?", answer: "Sample answer for how does." },
 ];
 
+// Define SVG sources for icons
+const ICON_SRC = "/Icon.svg";
+const ARROW_SRC = "/Icon.svg"; // replace with a different SVG if needed later
+
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
@@ -21,10 +26,11 @@ export default function FAQ() {
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         {/* Left Column */}
         <div className="flex flex-col items-start text-left">
-          {/* Logo placeholder */}
-            <div className="w-16 h-16 text-blue-600 flex items-center justify-center mb-4">
-                <img src="/Icon.svg" alt="eAMR Connect" className="h-20 w-20" /></div>
-                
+          {/* Logo */}
+          <div className="w-16 h-16 text-blue-600 flex items-center justify-center mb-4">
+            <SvgIcon src={ICON_SRC} size={64} />
+          </div>
+
           <h2 className="text-2xl font-bold text-blue-600 mb-4">
             Asked question
           </h2>
@@ -32,8 +38,12 @@ export default function FAQ() {
             If the question is not available on our FAQ section, feel free to
             contact us personally, we will resolve your respective doubts.
           </p>
+
           <button className="flex items-center bg-gray-100 hover:bg-gray-200 px-5 py-2 rounded-lg text-sm font-medium">
-            Ask Question <ArrowUpRight className="w-4 h-4 ml-2" />
+            Ask Question{" "}
+            <span className="ml-2">
+              <SvgIcon src={ARROW_SRC} size={16} />
+            </span>
           </button>
         </div>
 
@@ -45,11 +55,11 @@ export default function FAQ() {
               className="bg-gray-100 rounded-lg px-4 py-3 shadow-sm"
             >
               <button
-                className="w-full flex justify-between items-center font-medium text-left"
+                className="w-full flex justify-between items-center font-medium text-left text-gray-800"
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
               >
                 {faq.question}
-                <span className="text-xl font-bold">
+                <span className="text-xl text-black font-bold">
                   {openIndex === i ? "–" : "+"}
                 </span>
               </button>
