@@ -85,6 +85,13 @@ const handleLogout = () => {
   router.push("/signin");
 };
 
+useEffect(() => {
+  if (!isAuthenticated) return;
+
+  // Always create a new conversation
+  handleNewConversation();
+}, [isAuthenticated]);
+
   // Fetch convos list from API
 useEffect(() => {
   if (!isAuthenticated) return;
@@ -116,6 +123,27 @@ useEffect(() => {
     })
     .catch((err) => console.error("Failed to fetch convos:", err));
 }, [isAuthenticated]);
+
+useEffect(() => {
+  if (!isAuthenticated) return;
+
+  const initializeConversation = async () => {
+    if (conversations.length === 0) {
+      // No conversations exist, create a new one
+      await handleNewConversation();
+    } else {
+      // Conversations exist, set the last one as active
+      const lastConvo = conversations[conversations.length - 1];
+      setCurrentConversationId(lastConvo.id.toString());
+      setCurrentConversationTitle(lastConvo.title);
+
+      // Fetch messages for that conversation
+      await fetchMessages(lastConvo.id.toString());
+    }
+  };
+
+  initializeConversation();
+}, [isAuthenticated, conversations]);
 
 
 const fetchMessages = async (conversationId: string) => {
