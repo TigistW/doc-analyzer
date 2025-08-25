@@ -6,12 +6,19 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import SvgIcon from "../../components/Core/SvgIcon";
+import { randomUUID } from "crypto";
 
-interface Chat {
+interface Conversation{
   id: string;
   title: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  messages: any[];
 }
+
 interface User {
+  id: number;
   name: string;
   avatar: string;
 }
@@ -23,12 +30,16 @@ interface Message {
 export default function NewChatPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentConversationTitle, setCurrentConversationTitle] = useState<string>("New Chat");
+
+
 
 // Smooth auto-scroll whenever messages change
   useEffect(() => {
@@ -54,12 +65,13 @@ useEffect(() => {
   })
     .then(res => res.json())
     .then(data => setUser({
+      id: data.id,
       name: `${data.first_name} ${data.last_name?.charAt(0) || ''}.`,
       avatar: data.profile_picture || "/Group.png",
     }))
     .catch(err => {
       console.error("Profile fetch error:", err);
-      setUser({ name: "Guest User", avatar: "/Group.png" });
+      setUser({id:12, name: "Guest User", avatar: "/Group.png" });
     });
 
 }
@@ -73,84 +85,158 @@ const handleLogout = () => {
   router.push("/signin");
 };
 
-  // Fetch chats from API
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetch("/api/chat/convos")
-        .then((res) => res.json())
-        .then((data) => setChats(data))
-        .catch((err) => console.error("Failed to fetch chats:", err));
-    }
-  }, [isAuthenticated]);
+  // Fetch convos list from API
+useEffect(() => {
+  if (!isAuthenticated) return;
+
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    console.error("No token found");
+    return;
+  }
+
+  fetch("/api/chat/convos", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  })
+    .then((res) => res.json())
+    .then((data: Conversation[]) => {
+      console.log("Fetched convos:", data);
+      // Make sure data is an array before setting
+      if (Array.isArray(data)) {
+        setConversations(data);
+      } else {
+        console.error("Invalid convos data:", data);
+        setConversations([]);
+      }
+    })
+    .catch((err) => console.error("Failed to fetch convos:", err));
+}, [isAuthenticated]);
 
 
-  // ✅ Handle sending a message
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-
-  // Add user message to state
-    const newMessage: Message = {id: Date.now().toString(), role: "user", content: input };
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-
+const fetchMessages = async (conversationId: string) => {
     try {
-      // Send message to API
-      const res = await fetch("/api/chat/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
-      });
+      const token = localStorage.getItem("access_token");
+      console.log("Fetching messages with token:", token);
+      const res = await fetch(
+      `/api/chat/conversations/${conversationId}/messages`, 
+      {
+      method: "GET",
+      headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    });
 
+      console.log("Messages response:", res);
+      if (!res.ok) throw new Error("Failed to fetch messages");
       const data = await res.json();
 
-      // Add model's response
-      const modelMessage: Message = {id: Date.now().toString(), role: "model", content: data.reply };
-      setMessages((prev) => [...prev, modelMessage]);
+      const loadedMessages: Message[] = data.map((msg: any, idx: number) => ({
+        id: `${conversationId}-${idx}`,
+        role: msg.role === "model" ? "model" : "user",
+        content: msg.content,
+      }));
+
+      setMessages(loadedMessages);
+      setCurrentConversationId(conversationId);
+
     } catch (err) {
-      console.error("Error sending message:", err);
+      console.error("Error fetching conversation messages:", err);
     }
   };
+  const handleNewConversation = async () => {
+    try {
+      const token = localStorage.getItem("access_token"); // if using auth
+      if (!token) throw new Error("Unauthorized");
+
+      // Call Next.js API route that wraps your FastAPI backend
+      const res = await fetch("/api/chat/new_convo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: "New Chat", 
+          user_id: user?.id// empty initially
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to create conversation");
+      }
+
+      const newConvo = await res.json(); // ConversationOut from backend
+
+      // Add new conversation to chat list
+      setConversations((prev) => [newConvo, ...prev]);
+
+      // Clear current messages and set as current conversation
+      setMessages([]);
+      setCurrentConversationId(newConvo.id.toString());
+      setCurrentConversationTitle(newConvo.title); // optional state to track title
+    } catch (err) {
+      console.error("Error creating conversation:", err);
+    }
+  };
+
+
 
   // Function to handle sending message
   const handleSend = async () => {
-    if (!input.trim()) return; // prevent empty messages
+    const token = localStorage.getItem("access_token");
+    console.log("TOKEN", token);
+  if (!input.trim() || !currentConversationId) return;
+  const newMessage: Message = { id: Date.now().toString(), role: "user", content: input };
+  setMessages((prev) => [...prev, newMessage]);
+  console.log("Condition check, title is ->", currentConversationTitle);
+  
+  if (currentConversationTitle === "New Chat") {
+    console.log("Updating title to:", input.trim().slice(0, 20));
+    const newTitle = input.trim().slice(0, 20);
+    await fetch("/api/chat/update_convo_title", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+      body: JSON.stringify({ conversationId: currentConversationId, newTitle: newTitle }),
+    });
+    setCurrentConversationTitle(newTitle);
+    console.log("Title updated to:", currentConversationTitle);
+  }
+  const messageToSend = input;
 
-    // Add user message
-    // Create user message with unique id
-    const newMessage: Message = {
+  setInput("");
+
+  try {
+    const token = localStorage.getItem("access_token");
+    const res = await fetch("/api/chat/chat", {
+      method: "POST",
+      headers: {
+         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+         },
+      body: JSON.stringify({ message: messageToSend, conversationId: currentConversationId }),
+    });
+    const data = await res.json();
+    const assistantMessage: Message = {
       id: Date.now().toString(),
-      role: "user",
-      content: input,
+      role: "model",
+      content: data.reply,
     };
+    setMessages((prev) => [...prev, assistantMessage]);
+  } catch (err) {
+    console.error("Error sending message:", err);
+  }
+};
 
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-
-    // Clear input
-    setInput("");
-
-    // Call API
-    try {
-      const res = await fetch("/api/chat/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
-      });
-
-      const data = await res.json();
-
-      // Assistant message with id
-      const assistantMessage: Message = {
-        id: Date.now().toString() + "-model",
-        role: "model",
-        content: data.reply,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  };
 
   return (
     <div className="flex min-h-screen bg-white text-gray-800">
@@ -164,7 +250,7 @@ const handleLogout = () => {
   {/* New chat + search */}
   <div className="px-4 space-y-3 mt-3">  
     <button
-      onClick={() => setMessages([])}
+      onClick={handleNewConversation}
       className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-blue-400 text-white font-medium rounded-full hover:bg-blue-700 transition"
     >
        <SvgIcon src="/Icon.svg" size={20} /> New chat
@@ -178,14 +264,14 @@ const handleLogout = () => {
         Your Conversations
       </h2>
       <ul className="space-y-1">
-        {chats.map((chat) => (
-          <li key={chat.id}>
+        {conversations.map((conv) => (
+          <li key={conv.id}>
             <button
-              onClick={() => router.push(`/chat/${chat.id}`)}
+              onClick={() => fetchMessages(conv.id)}
               className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm rounded-md hover:bg-gray-100 transition"
             >
-               <SvgIcon src="/Icon.svg" size={16} />
-              <span className="truncate">{chat.title}</span>
+              <SvgIcon src="/Icon.svg" size={16} />
+              <span className="truncate">{conv.title}</span>
             </button>
           </li>
         ))}

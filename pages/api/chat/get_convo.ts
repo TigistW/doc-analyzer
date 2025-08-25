@@ -1,22 +1,40 @@
-import { NextResponse } from "next/server";
+async function ensureConversationTitle(conversationId: number, input: string) {
+  // Fetch latest conversation from backend
+  const res = await fetch(`/api/chat/conversations/${conversationId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  });
 
-const chatMessages: Record<string, { role: "user" | "assistant"; content: string }[]> = {
-  "1": [
-    { role: "user", content: "Explain AMR resistance in simple terms" },
-    { role: "assistant", content: "AMR (antimicrobial resistance) means bacteria, viruses, or fungi evolve so medicines no longer work effectively." },
-  ],
-  "2": [
-    { role: "user", content: "What is web accessibility?" },
-    { role: "assistant", content: "Web accessibility means designing websites usable by people with disabilities, such as screen reader support." },
-  ],
-  "3": [
-    { role: "user", content: "What is machine learning?" },
-    { role: "assistant", content: "Machine learning is when computers learn from data instead of being explicitly programmed." },
-  ],
-};
+  if (!res.ok) {
+    throw new Error("Failed to fetch conversation");
+  }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
-  const messages = chatMessages[id] || [];
-  return NextResponse.json(messages);
+  const convo = await res.json();
+
+  // Only update title if it’s still "New Chat"
+  if (convo.title === "New Chat") {
+    const newTitle = input.trim().slice(0, 20);
+
+    const updateRes = await fetch("/api/chat/update_convo_title", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+      body: JSON.stringify({
+        conversationId,
+        newTitle,
+      }),
+    });
+
+    if (!updateRes.ok) {
+      throw new Error("Failed to update title");
+    }
+
+    const updatedConvo = await updateRes.json();
+    return updatedConvo.title; // return fresh title
+  }
+
+  return convo.title; // already has custom title
 }

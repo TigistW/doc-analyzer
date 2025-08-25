@@ -1,24 +1,43 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-type Chat = {
-  id: string;
+type Conversation = {
+  id: number;
   title: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  messages: any[];
 };
 
-const mockChats: Chat[] = [
-  { id: "1", title: "How to write an.." },
-  { id: "2", title: "Web accessibility" },
-  { id: "3", title: "Design inspiration" },
-  { id: "4", title: "What is machine l." },
-  { id: "5", title: "How to write an..." },
-  { id: "6", title: "Web accessibility" },
-  { id: "7", title: "Design inspiration" },
-  { id: "8", title: "What is machine.." },
-];
+const BACKEND_URL = process.env.BACKEND_URL?.replace(/\/$/, "") || "http://196.190.220.63:8000";
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Chat[]>
+  res: NextApiResponse<Conversation[] | { error: string }>
 ) {
-  res.status(200).json(mockChats);
+  if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
+
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+    const response = await fetch(`${BACKEND_URL}/api/chat/convos`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json({ error: errorData.detail || "Failed to fetch conversations" });
+    }
+
+    const data: Conversation[] = await response.json();
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("Error fetching conversations:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 }

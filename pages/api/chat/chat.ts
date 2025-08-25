@@ -5,18 +5,22 @@ import type { NextApiRequest, NextApiResponse } from "next";
 type ChatResponse = {
   reply: string;
 };
-
+const BACKEND_URL = process.env.BACKEND_URL || "http://196.190.220.63:8000/";
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ChatResponse>
 ) {
+  console.log("TOKEN:", req.headers);
   if (req.method !== "POST") {
     return res.status(405).json({ reply: "Method not allowed" });
   }
 
   try {
-    const { message } = req.body;
-
+    const { message, conversationId } = req.body;
+    const convIdStr = Array.isArray(conversationId) ? conversationId[0] : conversationId;
+    const token = req.headers.authorization?.split(" ")[1]; // Bearer token
+    if (!token) return res.status(401).json({ reply: "Unauthorized" });
+    const convId = Number(convIdStr);
     if (!message || typeof message !== "string") {
       return res.status(400).json({ reply: "Invalid message" });
     }
@@ -24,7 +28,7 @@ export default async function handler(
     // --- Here is where you call your AI model ---
     // For example: with OpenAI API
     
-    const response = await fetch("http://196.190.220.63:8000/api/pipeline/gemini", {
+    const response = await fetch(`${BACKEND_URL}api/pipeline/gemini`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,6 +40,34 @@ export default async function handler(
     });
     const data = await response.json();
     const assistantReply = data.summary;
+
+    // --- Save user message to backend ---
+    await fetch(`${BACKEND_URL}api/chat/conversation/${convId}/message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        conversation_id: convId,
+        role: "user",
+        content: message,
+      }),
+    });
+
+    // --- Save assistant reply to backend ---
+    await fetch(`${BACKEND_URL}api/chat/conversation/${convId}/message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        conversation_id: convId,
+        role: "model",
+        content: assistantReply,
+      }),
+    });
     
     // Mock assistant reply (for testing without OpenAI)
     // const assistantReply = `You said: "${message}". Here's my response.`;
