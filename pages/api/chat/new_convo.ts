@@ -19,7 +19,7 @@ export default async function handler(
     const token = req.headers.authorization?.split(" ")[1]; // Bearer token
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
-    const { title, first_message , user_id} = req.body;
+    const { title , user_id} = req.body;
 
     const response = await fetch("http://196.190.220.63:8000/api/chat/new-chat", {
       method: "POST",
