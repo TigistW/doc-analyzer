@@ -35,7 +35,7 @@ export default async function handler(
       },
       body: JSON.stringify({
         query: message,
-        n_result: 5
+        n_result: 15
       }),
     });
     const data = await response.json();

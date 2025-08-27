@@ -43,7 +43,7 @@ export default function SignUp() {
       if (!res.ok) throw new Error(data.message || "Something went wrong");
 
       setSuccess("Account created successfully!");
-      router.push("/chat/new");
+      router.push("/signin");
       localStorage.setItem("user", JSON.stringify(data));
     //   window.location.href = "/signin"; // redirect after signup
     } catch (err: any) {

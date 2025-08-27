@@ -38,7 +38,27 @@ export default function NewChatPage() {
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [currentConversationTitle, setCurrentConversationTitle] = useState<string>("New Chat");
+  const [isDraftChat, setIsDraftChat] = useState(false);
+  const [showExamples, setShowExamples] = useState(true);
+  const [conversationCount, setConversationCount] = useState(0);
+  const [selectedModel, setSelectedModel] = useState("llama");
 
+  const models = [
+    {
+      id: "llama",
+      name: "LLaMA",
+      icon: "✨",
+      activeColor: "bg-purple-200 text-black",
+      inactiveColor: "bg-purple-200 text-purple-600",
+    },
+    {
+      id: "gemini",
+      name: "Gemini",
+      icon: "⚡",
+      activeColor: "bg-blue-300 text-black",
+      inactiveColor: "bg-blue-200 text-blue-600",
+    },
+  ];
 
 
 // Smooth auto-scroll whenever messages change
@@ -87,15 +107,12 @@ const handleLogout = () => {
 
 useEffect(() => {
   if (!isAuthenticated) return;
-
-  // Always create a new conversation
   handleNewConversation();
 }, [isAuthenticated]);
 
-  // Fetch convos list from API
+// Fetch convos list from API
 useEffect(() => {
   if (!isAuthenticated) return;
-
   const token = localStorage.getItem("access_token");
   if (!token) {
     console.error("No token found");
@@ -124,26 +141,26 @@ useEffect(() => {
     .catch((err) => console.error("Failed to fetch convos:", err));
 }, [isAuthenticated]);
 
-useEffect(() => {
-  if (!isAuthenticated) return;
+// useEffect(() => {
+//   if (!isAuthenticated) return;
 
-  const initializeConversation = async () => {
-    if (conversations.length === 0) {
-      // No conversations exist, create a new one
-      await handleNewConversation();
-    } else {
-      // Conversations exist, set the last one as active
-      const lastConvo = conversations[conversations.length - 1];
-      setCurrentConversationId(lastConvo.id.toString());
-      setCurrentConversationTitle(lastConvo.title);
+//   const initializeConversation = async () => {
+//     if (conversations.length === 0) {
+//       // No conversations exist, create a new one
+//       await handleNewConversation();
+//     } else {
+//       // Conversations exist, set the last one as active
+//       const lastConvo = conversations[conversations.length - 1];
+//       setCurrentConversationId(lastConvo.id.toString());
+//       setCurrentConversationTitle(lastConvo.title);
 
-      // Fetch messages for that conversation
-      await fetchMessages(lastConvo.id.toString());
-    }
-  };
+//       // Fetch messages for that conversation
+//       await fetchMessages(lastConvo.id.toString());
+//     }
+//   };
 
-  initializeConversation();
-}, [isAuthenticated, conversations]);
+//   initializeConversation();
+// }, [isAuthenticated, conversations]);
 
 
 const fetchMessages = async (conversationId: string) => {
@@ -177,89 +194,113 @@ const fetchMessages = async (conversationId: string) => {
       console.error("Error fetching conversation messages:", err);
     }
   };
-  const handleNewConversation = async () => {
-    try {
-      const token = localStorage.getItem("access_token"); // if using auth
-      if (!token) throw new Error("Unauthorized");
 
-      // Call Next.js API route that wraps your FastAPI backend
+const handleNewConversation = () => {
+  setMessages([]);                  // clear messages
+  setCurrentConversationId(null);   // no active convo yet
+  setCurrentConversationTitle("New Chat");
+  setIsDraftChat(true);    
+  setConversationCount(prev => prev + 1);
+
+  // Clear the visible chat container too
+  if (chatContainerRef.current) {
+    chatContainerRef.current.scrollTop = 0;
+  }
+};
+
+// ------------------- Send Message Handler -------------------
+const handleSend = async () => {
+  if (!input.trim()) return;
+  if (showExamples) setShowExamples(false);
+
+  const userMessage = input.trim();
+  setInput(""); // clear input immediately
+
+  let conversationId = currentConversationId;
+
+  // -------- Step 1: If no conversation exists, create it first --------
+  if (!conversationId) {
+    try {
+      const token = localStorage.getItem("access_token");
       const res = await fetch("/api/chat/new_convo", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          title: "New Chat", 
-          user_id: user?.id// empty initially
-        }),
+        body: JSON.stringify({ title: "New Chat", user_id: user?.id }),
       });
+      const newConvo = await res.json();
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "Failed to create conversation");
-      }
-
-      const newConvo = await res.json(); // ConversationOut from backend
-
-      // Add new conversation to chat list
-      setConversations((prev) => [newConvo, ...prev]);
-
-      // Clear current messages and set as current conversation
-      setMessages([]);
+      // Update sidebar immediately
+      setConversations(prev => [newConvo, ...prev]);
       setCurrentConversationId(newConvo.id.toString());
-      setCurrentConversationTitle(newConvo.title); // optional state to track title
+      setCurrentConversationTitle(newConvo.title);
+      conversationId = newConvo.id.toString();
+
+      // Start messages fresh with user message
+      setMessages([{ id: Date.now().toString(), role: "user", content: userMessage }]);
+
+      setIsDraftChat(false); // draft finished
+
     } catch (err) {
       console.error("Error creating conversation:", err);
+      return;
     }
-  };
-
-
-
-  // Function to handle sending message
-  const handleSend = async () => {
-    const token = localStorage.getItem("access_token");
-    console.log("TOKEN", token);
-  if (!input.trim() || !currentConversationId) return;
-  const newMessage: Message = { id: Date.now().toString(), role: "user", content: input };
-  setMessages((prev) => [...prev, newMessage]);
-  console.log("Condition check, title is ->", currentConversationTitle);
-  
-  if (currentConversationTitle === "New Chat") {
-    console.log("Updating title to:", input.trim().slice(0, 20));
-    const newTitle = input.trim().slice(0, 20);
-    await fetch("/api/chat/update_convo_title", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify({ conversationId: currentConversationId, newTitle: newTitle }),
-    });
-    setCurrentConversationTitle(newTitle);
-    console.log("Title updated to:", currentConversationTitle);
+  } else {
+    // Existing conversation → append user message
+    setMessages(prev => [...prev, { id: Date.now().toString(), role: "user", content: userMessage }]);
   }
-  const messageToSend = input;
 
-  setInput("");
+  // -------- Step 2: Optimistically update conversation title --------
+  if (currentConversationTitle === "New Chat") {
+    const newTitle = userMessage.slice(0, 20);
 
+    // Update header
+    setCurrentConversationTitle(newTitle);
+
+    // Update sidebar
+    setConversations(prev =>
+      prev.map(convo =>
+        convo.id.toString() === conversationId ? { ...convo, title: newTitle } : convo
+      )
+    );
+
+    // Update backend asynchronously
+    (async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        await fetch("/api/chat/update_convo_title", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ conversationId, newTitle }),
+        });
+      } catch (err) {
+        console.error("Failed to update conversation title:", err);
+      }
+    })();
+  }
+
+  // -------- Step 3: Send user message to backend and append reply --------
   try {
     const token = localStorage.getItem("access_token");
     const res = await fetch("/api/chat/chat", {
       method: "POST",
-      headers: {
-         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-         },
-      body: JSON.stringify({ message: messageToSend, conversationId: currentConversationId }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+      message: userMessage,
+      conversationId,
+      model: selectedModel,   // <-- send model info
+    }),
     });
     const data = await res.json();
-    const assistantMessage: Message = {
-      id: Date.now().toString(),
-      role: "model",
-      content: data.reply,
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
+    const assistantMessage = { id: Date.now().toString(), role: "model" as const, content: data.reply as string};
+
+    setMessages(prev => [...prev, assistantMessage]);
+
   } catch (err) {
     console.error("Error sending message:", err);
   }
@@ -283,14 +324,15 @@ const fetchMessages = async (conversationId: string) => {
     >
        <SvgIcon src="/Icon.svg" size={20} /> New chat
     </button>
+    <h2 className="text-sm font-semibold text-gray-800 mb-6 ml-3">
+        Your Conversations
+      </h2>
 
   </div>
 
     {/* Conversation list */}
-    <div className="flex-1 overflow-y-auto mt-6 px-3">
-      <h2 className="text-sm font-semibold text-gray-800 mb-6 ml-3">
-        Your Conversations
-      </h2>
+    <div className="flex-1 overflow-y-auto scroller-hide mt-6 px-3">
+      
       <ul className="space-y-1">
         {conversations.map((conv) => (
           <li key={conv.id}>
@@ -355,125 +397,146 @@ const fetchMessages = async (conversationId: string) => {
     <div className="flex flex-col">
       <main className="flex-1 flex flex-col min-h-0 items-center justify-between px-3 py-2">
           {/* Floating avatars */}
-          {/* Floating avatars */}
           <div className="flex gap-6 mb-14 fixed top-2 left-1/2 transform -translate-x-1/2 z-10">
-            {/* Llama */}
-            <button className="flex items-center gap-3 px-6 py-2 bg-white rounded-2xl shadow-md hover:shadow-full transition-all">
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-200 text-purple-600">
-                <span className="text-lg">✨</span>
-              </div>
-              <span className="font-medium text-gray-800">Llama</span>
-            </button>
-
-            {/* Gemini */}
-            <button className="flex items-center gap-3 px-6 py-2 bg-white rounded-2xl shadow-md hover:shadow-lg transition-all">
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600">
-                <span className="text-lg">⚡</span>
-              </div>
-              <span className="font-medium text-gray-800">Gemini</span>
-            </button>
-          </div>
+          {models.map((model) => {
+            const isActive = selectedModel === model.id;
+            return (
+              <button
+                key={model.id}
+                onClick={() => setSelectedModel(model.id)}
+                aria-pressed={isActive}
+                className={`flex items-center gap-3 px-6 py-2 rounded-2xl shadow-md transition-all 
+                  ${isActive ? "bg-blue-200 text-black shadow-lg scale-220" : "bg-white hover:shadow-lg scale-100"}
+                `}
+              >
+              <div
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                  isActive ? model.activeColor : model.inactiveColor
+                }`}
+              >
+                <span className="text-lg">{model.icon}</span>
+            </div>
+            <span className="font-medium">{model.name}</span>
+          </button>
+        );
+      })}
+    </div>
 
           {/* Three Columns */}
-          {/* Chat messages */}
-            <div 
-            ref={chatContainerRef}
-            className="flex-1 overflow-y-auto px-10 py-6 space-y-6 mt-28">
-              {messages.length === 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl w-full ">
-                        <div className="flex flex-col items-center text-center">
-                          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-blue-500" />
-                          <h3 className="text-base font-semibold mb-4">Examples</h3>
-                          <div className="space-y-3 text-xs w-full">
-                            <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
-                              “Explain AMR resistance in simple terms in the district of Addis.”
-                            </button>
-                            <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
-                              “Any statistics on the prevalence of E. Coli in Addis Ababa?”
-                            </button>
-                            <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
-                              “How do I prevent the usage of too many antibiotics?”
-                            </button>
-                          </div>
-                        </div>
+         {/* Chat messages */}
+<div 
+  ref={chatContainerRef}
+  className="flex-1 overflow-y-auto scroller-hide px-10 py-6 space-y-6 mt-28"
+>
+  {messages.length === 0 ? (
+    showExamples ? (
+      // ✅ First-ever load: show Examples/Capabilities/Limitations
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl w-full">
+        {/* Examples */}
+        <div className="flex flex-col items-center text-center">
+          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-blue-500" />
+          <h3 className="text-base font-semibold mb-4">Examples</h3>
+          <div className="space-y-3 text-xs w-full">
+            <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
+              “Explain AMR resistance in simple terms in the district of Addis.”
+            </button>
+            <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
+              “Any statistics on the prevalence of E. Coli in Addis Ababa?”
+            </button>
+            <button className="w-full p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
+              “How do I prevent the usage of too many antibiotics?”
+            </button>
+          </div>
+        </div>
 
-                        {/* Capabilities */}
-                        <div className="flex flex-col items-center text-center">
-                          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-green-500" />
-                          <h3 className="text-base font-semibold mb-4">Capabilities</h3>
-                          <ul className="space-y-3 text-xs text-gray-600">
-                            <li className="p-3 rounded-lg bg-gray-100">✔️ Provides answers as explanations to the provided query.</li>
-                            <li className="p-3 rounded-lg bg-gray-100">✔️ Allows user to get statistical data in tabular/image format.</li>
-                            <li className="p-3 rounded-lg bg-gray-100">✔️ Trained to tailor query to the knowledge scope of the subject.</li>
-                          </ul>
-                        </div>
+        {/* Capabilities */}
+        <div className="flex flex-col items-center text-center">
+          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-green-500" />
+          <h3 className="text-base font-semibold mb-4">Capabilities</h3>
+          <ul className="space-y-3 text-xs text-gray-600">
+            <li className="p-3 rounded-lg bg-gray-100">✔️ Provides answers as explanations to the provided query.</li>
+            <li className="p-3 rounded-lg bg-gray-100">✔️ Allows user to get statistical data in tabular/image format.</li>
+            <li className="p-3 rounded-lg bg-gray-100">✔️ Trained to tailor query to the knowledge scope of the subject.</li>
+          </ul>
+        </div>
 
-                        {/* Limitations */}
-                        <div className="flex flex-col items-center text-center">
-                           <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-yellow-500" />
-                          <h3 className="text-base font-semibold mb-4">Limitations</h3>
-                          <ul className="space-y-3 text-xs text-gray-600">
-                            <li className="p-3 rounded-lg bg-gray-100">⚠️ May occasionally generate incorrect information</li>
-                            <li className="p-3 rounded-lg bg-gray-100">⚠️ May occasionally produce biased content and information</li>
-                            <li className="p-3 rounded-lg bg-gray-100">⚠️ Limited knowledge to the scope of the study of the eAMR</li>
-                          </ul>
-                        </div>
-                      </div>
-                      ) : (// 👇 shows actual conversation when user sends/receives messages
-                  messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex ${
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      {/* Show avatar on left for assistant, on right for user */}
-                      {msg.role === "model" && (
-                        <div className="flex-shrink-0">
-                          <img
-                            src="/Group.png"
-                            alt="Model"
-                            className="w-8 h-8 rounded-full"
-                          />
-                        </div>
-                      )}
-                      <div
-                        className={`px-4 py-3 rounded-2xl max-w-3xl ${
-                          msg.role === "user"
-                            ? "bg-white text-black text-right"
-                            : "bg-white text-gray-800 text-left"
-                        }`}
-                        style={{
-                          // ✅ Assistant always starts at same left margin
-                          width: "800px",
-                          height: "auto",
-                          marginLeft: msg.role === "model" ? "0px" : undefined,
-                          marginRight: msg.role === "user" ? "0px" : undefined,
-                        }}
-                      >
-                        {/* <p className="text-sm">{msg.content}</p> */}
-                      <div className="prose prose-sm max-w-none">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm] as PluggableList}
-                        >
-                          {String(msg.content ?? "")}
-                        </ReactMarkdown>
-                      </div>
-                      </div>
-                      {msg.role === "user" && (
-                  <div className="flex-shrink-0">
-                    <img
-                      src={user?.avatar || "/Logo.svg"}
-                      alt={user?.name || "You"}
-                      className="w-8 h-8 rounded-full"
-                    />
-                  </div>
-                      )}
-                    </div>
-                  ))
-                )}
-                 <div ref={endOfMessagesRef} className="h-20" />
-              </div>
+        {/* Limitations */}
+        <div className="flex flex-col items-center text-center">
+          <SvgIcon src="/Icon.svg" size={16} className="mb-3 text-yellow-500" />
+          <h3 className="text-base font-semibold mb-4">Limitations</h3>
+          <ul className="space-y-3 text-xs text-gray-600">
+            <li className="p-3 rounded-lg bg-gray-100">⚠️ May occasionally generate incorrect information</li>
+            <li className="p-3 rounded-lg bg-gray-100">⚠️ May occasionally produce biased content and information</li>
+            <li className="p-3 rounded-lg bg-gray-100">⚠️ Limited knowledge to the scope of the study of the eAMR</li>
+          </ul>
+        </div>
+      </div>
+    ) : (
+      // After first chat, show placeholder instead of examples
+      <div className="flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <img 
+            src="/Logo.svg" 
+            alt="Logo" 
+            className="mx-auto mb-4 w-24 h-24"
+          />
+          <p className="text-2xl">Hey there {user?.name} Start a new conversation</p>
+        </div>
+      </div>
+        )
+  ) : (
+    // Actual chat conversation
+    messages.map((msg, idx) => (
+      <div
+        key={idx}
+        className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+      >
+        {/* Avatar left for model, right for user */}
+        {msg.role === "model" && (
+          <div className="flex-shrink-0">
+             <img 
+              src={selectedModel === "llama" ? "/Icon.svg" : "/Group.png"} 
+              alt={selectedModel} 
+              className="w-8 h-8 rounded-full" 
+            />
+          </div>
+        )}
+
+        <div
+          className={`px-4 py-3 rounded-2xl max-w-3xl ${
+            msg.role === "user"
+              ? "bg-white text-black text-right"
+              : "bg-white text-gray-800 text-left"
+          }`}
+          style={{
+            width: "800px",
+            height: "auto",
+            marginLeft: msg.role === "model" ? "0px" : undefined,
+            marginRight: msg.role === "user" ? "0px" : undefined,
+          }}
+        >
+          <div className="prose prose-sm max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm] as PluggableList}>
+              {String(msg.content ?? "")}
+            </ReactMarkdown>
+          </div>
+        </div>
+
+        {msg.role === "user" && (
+          <div className="flex-shrink-0">
+            <img
+              src={user?.avatar || "/Logo.svg"}
+              alt={user?.name || "You"}
+              className="w-8 h-8 rounded-full"
+            />
+          </div>
+        )}
+      </div>
+    ))
+  )}
+  <div ref={endOfMessagesRef} className="h-20" />
+</div>
+
         
 
         {/* Input Area */}

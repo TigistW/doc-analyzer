@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide scrollbar by default */
+.scroller-hide::-webkit-scrollbar {
+  width: 6px;
+}
+.scroller-hide::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroller-hide::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* scrollbar color */
+  border-radius: 3px;
+  visibility: hidden; /* start hidden */
+}
+
+/* Show on hover */
+.scroller-hide:hover::-webkit-scrollbar-thumb {
+  visibility: visible;
+}
+
+/* Firefox */
+.scroller-hide {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.3) transparent;
+}
+.scroller-hide:not(:hover) {
+  scrollbar-color: transparent transparent; /* hidden when not hovering */
+}

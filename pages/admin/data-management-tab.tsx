@@ -1,124 +1,173 @@
-// import FileTable, {File as TableFile } from "@/components/Admin/FileTable";
+"use client";
 
-
-// export default function DataManagementPage() {
-//   const files: TableFile[] = [
-//     { id: 1, name: "Customer Records.csv", dateAdded: "2025-08-20" },
-//     { id: 2, name: "Sales_Report_Q3.pdf", dateAdded: "2025-08-18" },
-//     { id: 3, name: "User_Activity_Logs.json", dateAdded: "2025-08-15" },
-//   ];
-
-//   return (
-//     <div className="p-6">
-//       <h2 className="text-lg font-bold mb-4">Data Management</h2>
-//       <FileTable files={files} />
-//     </div>
-//   );
-// }
-
-import StatsCard from "@/components/Admin/StatsCard";
-import StatusBadgeCard from "@/components/Admin/StatusBadgeCard";
+import { useEffect, useState } from "react";
 import FileTable, { File as TableFile } from "@/components/Admin/FileTable";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Line, Bar } from "react-chartjs-2";
-import { Users, Clock, FileText, Database, Activity, Star } from "lucide-react";
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+interface BackendResponse {
+  total: number;
+  skip: number;
+  limit: number;
+  search?: string;
+  start_date?: string;
+  end_date?: string;
+  sort_by?: string;
+  order?: string;
+  files: TableFile[];
+}
 
-export default function Dashboard() {
-  const stats = {
-    totalQueries: "50.8K",
-    allTimeUsers: "23.6K",
-    totalDataEntries: "756",
-    avgResponseTime: "9 sec",
-    vectorDbStatus: "Healthy",
-    avgRetrievalTime: "2.3 sec",
-    avgRating: "3.9",
+export default function DataManagement() {
+  const [files, setFiles] = useState<TableFile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Pagination & search state
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [sortBy, setSortBy] = useState("last_modified"); // backend default
+  const [order, setOrder] = useState<"asc" | "desc">("desc");
+
+  const fetchFiles = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("access_token");
+
+    try {
+      const params = new URLSearchParams();
+      params.append("skip", (page * limit).toString());
+      params.append("limit", limit.toString());
+      if (search) params.append("search", search);
+      if (startDate) params.append("start_date", startDate);
+      if (endDate) params.append("end_date", endDate);
+      if (sortBy) params.append("sort_by", sortBy);
+      if (order) params.append("order", order);
+
+      const res = await fetch(`/api/dashboard/files?${params.toString()}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch files");
+
+      const data: BackendResponse = await res.json();
+
+      // Generate temporary id for the table
+      const filesWithId = data.files.map((file, index) => ({
+      ...file,               // spread first
+      id: index + page * limit, // then overwrite / assign new id
+    }));
+
+
+      setFiles(filesWithId);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const testFiles: TableFile[] = [
-    { id: 1, name: "Report V1.0.pdf", dateAdded: "2025-08-21" },
-    { id: 2, name: "Analysis_Results.csv", dateAdded: "2025-08-20" },
-    { id: 3, name: "UserLogs.json", dateAdded: "2025-08-18" },
-    { id: 4, name: "Nandy Gom.json", dateAdded: "2025-08-18" },
-    { id: 3, name: "UserLogs.json", dateAdded: "2025-08-18" },
-    { id: 4, name: "Nandy Gom.json", dateAdded: "2025-08-18" }
-  ];
+  useEffect(() => {
+    fetchFiles();
+  }, [page, limit,sortBy, order]);
 
-  // Line Chart (Total Queries Trend)
-  const lineData = {
-    labels: ["Aug 1", "Aug 5", "Aug 10", "Aug 15", "Aug 20", "Aug 25", "Aug 30"],
-    datasets: [
-      {
-        label: "Total Queries",
-        data: [20, 40, 60, 30, 80, 50, 70],
-        borderColor: "#3b82f6",
-        backgroundColor: "rgba(59, 130, 246, 0.2)",
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
+  if (loading) {
+  return (
+    <div className="p-6 space-y-4">
+      {/* Spinner */}
+      <div className="flex justify-center">
+        <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+      </div>
 
-  // Bar Chart (All Time Users)
-  const barData = {
-    labels: ["Aug 1", "Aug 5", "Aug 10", "Aug 15", "Aug 20", "Aug 25", "Aug 30"],
-    datasets: [
-      {
-        label: "All Time Users",
-        data: [50, 70, 90, 40, 100, 80, 60],
-        backgroundColor: "#60a5fa",
-      },
-    ],
-  };
+      {/* Loading text */}
+      <p className="text-center text-gray-500 font-medium">Loading files...</p>
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true },
-    },
-    scales: {
-      x: { grid: { display: false } },
-      y: { grid: { color: "#f3f4f6" } },
-    },
-  };
+      {/* Table skeleton */}
+      <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <div key={idx} className="flex px-4 py-3 border-b border-gray-200 animate-pulse">
+            <div className="w-12 h-4 bg-gray-300 rounded mr-4"></div>
+            <div className="flex-1 h-4 bg-gray-300 rounded"></div>
+            <div className="w-24 h-4 bg-gray-300 rounded ml-4"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
   return (
-    <div className="p-3 space-y-2">
-      {/* Top 4 Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatsCard title="Total Queries" value={stats.totalQueries} icon={<FileText />} trend="up" />
-        <StatsCard title="All Time Users" value={stats.allTimeUsers} icon={<Users />} trend="down" />
-        <StatsCard title="Total Data Entries" value={stats.totalDataEntries} icon={<Database />} trend="up" />
-        <StatsCard title="Avg Response Time" value={stats.avgResponseTime} icon={<Clock />} trend="up" />
+    <div className="p-4 space-y-2">
+      {/* <h2 className="text-lg font-bold mb-4">Data Management</h2> */}
+
+      {/* Filters */}
+      <div className="flex gap-2 mb-4 flex-wrap items-center">
+        <input
+          type="text"
+          placeholder="Search files..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setPage(0); // Reset to first page
+              fetchFiles(); // Trigger fetch manually
+            }
+          }}
+          className="px-4 py-2 border rounded-2xl shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+        />
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-4 py-2 border rounded-2xl shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+        >
+          <option value="filename" className="px-2 py-1 hover:bg-gray-100">
+            Filename
+          </option>
+          <option value="last_modified" className="px-2 py-1 hover:bg-gray-100">
+            Date Modified
+          </option>
+        </select>
+
+        <select
+          value={order}
+          onChange={(e) => setOrder(e.target.value as "asc" | "desc")}
+          className="px-4 py-2 border rounded-2xl shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+        >
+          <option value="asc" className="px-2 py-1 hover:bg-gray-100">
+            Ascending
+          </option>
+          <option value="desc" className="px-2 py-1 hover:bg-gray-100">
+            Descending
+          </option>
+        </select>
+
       </div>
-        {/* Middle Section */}
-        <div className="p-6">
-        <h2 className="text-lg font-bold mb-4">Data Management</h2>
-        <FileTable files={testFiles} />
-        </div>
-        </div>
-    
+
+      <FileTable files={files} />
+
+      {/* Pagination controls */}
+      <div className="flex gap-2 mt-4 justify-center items-center">
+        <button
+          className="px-4 py-2 bg-blue-400 text-white rounded-2xl shadow hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-600 transition-colors duration-200"
+          disabled={page === 0}
+          onClick={() => setPage((p) => p - 1)}
+        >
+          Prev
+        </button>
+
+        <span className="px-3 py-2 text-gray-900 font-medium">
+          Page {page + 1}
+        </span>
+
+        <button
+          className="px-4 py-2 bg-blue-400 text-white rounded-2xl shadow hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-600 transition-colors duration-200"
+          disabled={files.length < limit}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          Next
+        </button>
+      </div>
+
+    </div>
   );
 }

@@ -36,7 +36,7 @@ export default function SignIn() {
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("refresh_token", data.refresh_token);
     //Redirect based on role
-    if (data.role === "admin") {
+    if (data.user.role === "admin") {
       router.push("/admin/dashboard-page");
     } else {
       router.push("/chat/new");
@@ -191,7 +191,6 @@ export default function SignIn() {
   }}
   onError={() => setError("Google login failed")}
 />
-
             </div>
           </div>
 
