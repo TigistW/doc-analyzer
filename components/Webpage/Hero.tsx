@@ -60,13 +60,13 @@ export default function Hero() {
 
           {/* CTA */}
           <div className="mt-6">
-            <a
+            <Link
               href="/signin"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition"
             >
               Try today
               <SvgIcon src="/Icon.svg" size={16} />
-            </a>
+            </Link>
           </div>
         </div>
 
