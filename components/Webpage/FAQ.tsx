@@ -4,14 +4,14 @@ import SvgIcon from "../Core/SvgIcon";
 
 const faqs = [
   {
-    question: "What is AI?",
+    question: "What is antimicrobial resistance (AMR)?",
     answer:
-      "AI stands for Artificial Intelligence, which refers to the simulation of human intelligence in machines. It enables them to perform tasks like problem-solving, learning, and decision-making.",
+      "AMR occurs when bacteria, viruses, fungi, or parasites evolve to resist the effects of medications designed to kill them. This makes infections harder to treat, leading to longer illnesses, higher medical costs, and increased mortality.",
   },
-  { question: "How can I ....?", answer: "Sample answer for how can I." },
-  { question: "Are your ....?", answer: "Sample answer for are your." },
-  { question: "Can I ....?", answer: "Sample answer for can I." },
-  { question: "How does...?", answer: "Sample answer for how does." },
+  { question: "Why is AMR a concern in Ethiopia?", answer: "In Ethiopia, factors such as overuse of antibiotics, limited access to diagnostic tests, and poor infection control in healthcare and agriculture contribute to the rise of resistant bacteria. Addressing AMR is crucial to protect public health and ensure effective treatments remain available." },
+  { question: "Which bacteria are most commonly resistant?", answer: "Some of the most concerning resistant bacteria include Escherichia coli, Staphylococcus aureus (including MRSA), Salmonella species, and Klebsiella pneumoniae. These bacteria can cause urinary tract infections, bloodstream infections, and foodborne illnesses, making them a significant health threat when resistance develops." },
+  { question: "How does antimicrobial resistance develop?", answer: "Resistance develops when microbes are exposed to antimicrobials inappropriately, such as using antibiotics without a prescription, not completing the prescribed course, or using antibiotics in livestock feed. These practices allow some microbes to survive and multiply, spreading resistance to others." },
+  { question: "Can I contribute or submit data to your platform?", answer: "Yes. We encourage researchers and healthcare institutions to share published studies, datasets, and reports. Contributions help us maintain a comprehensive resource for AMR surveillance and research." },
 ];
 
 // Define SVG sources for icons
@@ -39,12 +39,14 @@ export default function FAQ() {
             contact us personally, we will resolve your respective doubts.
           </p>
 
-          <button className="flex items-center bg-gray-100 hover:bg-gray-200 px-5 py-2 rounded-lg text-sm font-medium">
-            Ask Question{" "}
+          <a href="#contactus">
+          <button className="flex text-gray-800 items-center bg-gray-100 hover:bg-gray-300 px-5 py-2 rounded-lg text-sm font-medium">
+            Ask Question
             <span className="ml-2">
               <SvgIcon src={ARROW_SRC} size={16} />
             </span>
           </button>
+        </a>
         </div>
 
         {/* Right Column (Accordion FAQ) */}

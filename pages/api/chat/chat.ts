@@ -16,7 +16,7 @@ export default async function handler(
   }
 
   try {
-    const { message, conversationId } = req.body;
+    const { message, conversationId, selectedModel } = req.body;
     const convIdStr = Array.isArray(conversationId) ? conversationId[0] : conversationId;
     const token = req.headers.authorization?.split(" ")[1]; // Bearer token
     if (!token) return res.status(401).json({ reply: "Unauthorized" });
@@ -24,11 +24,19 @@ export default async function handler(
     if (!message || typeof message !== "string") {
       return res.status(400).json({ reply: "Invalid message" });
     }
+    // --- Model → Endpoint mapping ---
+    // console.log("Selected Model:", selectedModel);
+    const modelEndpoints: Record<string, string> = {
+      gemini: `${BACKEND_URL}api/pipeline/gemini`,
+      openai: `${BACKEND_URL}api/pipeline/openai`,
+      llama: `${BACKEND_URL}api/pipeline/llama`,
+      // add more as needed
+    };
 
-    // --- Here is where you call your AI model ---
-    // For example: with OpenAI API
+    // Pick endpoint or fallback
+    const endpoint = modelEndpoints[selectedModel] || modelEndpoints["gemini"];
     
-    const response = await fetch(`${BACKEND_URL}api/pipeline/gemini`, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -13,17 +13,17 @@ export default async function handler(
 
 
    
-  console.log("Fetching messages for conversation ID:", id);
-  console.log("Type of id:", typeof id);
+  // console.log("Fetching messages for conversation ID:", id);
+  // console.log("Type of id:", typeof id);
 
   const authHeader = req.headers.authorization; // e.g., "Bearer <token>"
-  console.log("Authorization Header:", authHeader);
+  // console.log("Authorization Header:", authHeader);
   if (!authHeader) return res.status(401).json({ error: "Missing Authorization header" });
 
   const token = authHeader.split(" ")[1]; // get only the token part
   if (!token) return res.status(401).json({ error: "Invalid token format" });
 
-  console.log("Token:", token);
+  // console.log("Token:", token);
 
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" }); 
   
@@ -41,7 +41,7 @@ export default async function handler(
     // const data = { messages: [] } // temporary fix for undefined messages error
     return res.status(200).json(data);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     return res.status(500).json({ error: "Failed to fetch messages" });
   }
 }

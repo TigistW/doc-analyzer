@@ -113,12 +113,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("access_token");
 
     // ✅ Public pages
-    const publicPaths = ["/", "/signin", "/signup"];
+    const publicPaths = ["/", "/signin", "/signup", "/auth/google/callback"];
 
     if (!token) {
       // Only redirect if trying to access a protected page
       if (!publicPaths.includes(pathname)) {
+        if (!pathname.startsWith("/auth/google")) {
         router.push("/");
+      }
       }
       return;
     }

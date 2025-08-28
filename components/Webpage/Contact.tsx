@@ -25,7 +25,12 @@ const Contact: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", form);
-    alert("Message sent!");
+    if (!form.agree) {
+      alert("You must agree to Terms of Use and Privacy Policy");
+    return;
+  }
+
+    alert("Thank you for contacting us!");
     setForm({
       firstName: "",
       lastName: "",

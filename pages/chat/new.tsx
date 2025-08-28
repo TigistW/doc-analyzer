@@ -41,7 +41,7 @@ export default function NewChatPage() {
   const [isDraftChat, setIsDraftChat] = useState(false);
   const [showExamples, setShowExamples] = useState(true);
   const [conversationCount, setConversationCount] = useState(0);
-  const [selectedModel, setSelectedModel] = useState("llama");
+  const [selectedModel, setSelectedModel] = useState("gemini");
 
   const models = [
     {
@@ -293,7 +293,7 @@ const handleSend = async () => {
       body: JSON.stringify({
       message: userMessage,
       conversationId,
-      model: selectedModel,   // <-- send model info
+      selectedModel: selectedModel,   // <-- send model info
     }),
     });
     const data = await res.json();
