@@ -47,7 +47,7 @@ export default function Hero() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mt-8">
             {[
-              { value: '300+', label: 'Resources Included' },
+              { value: '350+', label: 'Resources Included' },
               { value: '2+', label: 'Total Models' },
               { value: '10+', label: 'Active Users' },
             ].map((stat) => (
@@ -70,7 +70,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right Side (Optional Image/Illustration) */}
+        {/* Right Side */}
         <div className="hidden md:block">
           <img
             src="/Logo.svg"

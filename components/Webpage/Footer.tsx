@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import SvgIcon from "../Core/SvgIcon";
+import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
@@ -56,12 +57,12 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
           {/* Left */}
           <div className="flex gap-4 mb-4 md:mb-0">
-            <a href="#" className="hover:underline">
+            <Link href="/terms" className="hover:underline">
               Terms & Conditions
-            </a>
-            <a href="#" className="hover:underline">
+            </Link>
+            <Link href="/privacy-policy" className="hover:underline">
               Privacy Policy
-            </a>
+            </Link>
           </div>
 
           {/* Center: Social Icons */}

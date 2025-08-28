@@ -109,9 +109,7 @@ const Contact: React.FC = () => {
               </label>
               <div className="flex">
                 <select className="p-3 border rounded-l bg-gray-100">
-                  <option>+1</option>
-                  <option>+44</option>
-                  <option>+91</option>
+                  <option>+251</option>
                 </select>
                 <input
                   type="tel"
