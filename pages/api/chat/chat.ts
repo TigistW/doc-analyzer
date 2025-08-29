@@ -29,8 +29,8 @@ export default async function handler(
     const modelEndpoints: Record<string, string> = {
       gemini: `${BACKEND_URL}api/pipeline/gemini`,
       openai: `${BACKEND_URL}api/pipeline/openai`,
-      llama: `${BACKEND_URL}api/pipeline/llama`,
-      // add more as needed
+      llama: `${BACKEND_URL}api/pipeline/gemini`,
+     
     };
 
     // Pick endpoint or fallback

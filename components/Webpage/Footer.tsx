@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-white border-t border-gray-200 mt-12">
+    <footer className="bg-white border-t border-gray-200">
       <div className="container mx-auto px-6 py-10">
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Resources */}
-          <div>
+          {/* <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">
               Resources
             </h3>
@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
                 Feedback ↗
               </a>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Divider */}
