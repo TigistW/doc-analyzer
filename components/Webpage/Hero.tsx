@@ -49,7 +49,7 @@ export default function Hero() {
             {[
               { value: '350+', label: 'Resources Included' },
               { value: '2+', label: 'Total Models' },
-              { value: '10+', label: 'Active Users' },
+              { value: '5+', label: 'Users' },
             ].map((stat) => (
               <div key={stat.label} className="bg-gray-50 p-4 rounded-lg shadow-sm">
                 <p className="text-2xl font-bold text-blue-600">{stat.value}</p>
