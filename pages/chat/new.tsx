@@ -532,9 +532,24 @@ const handleSend = async () => {
           }}
         >
           <div className="prose prose-sm max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm] as PluggableList}>
+            {/* <ReactMarkdown remarkPlugins={[remarkGfm] as PluggableList}>
               {String(msg.content ?? "")}
-            </ReactMarkdown>
+            </ReactMarkdown> */}
+            <ReactMarkdown
+            remarkPlugins={[remarkGfm] as PluggableList}
+            components={{
+              a: ({ node, ...props }) => (
+                <a
+                  {...props}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "blue", textDecoration: "underline" }}
+                />
+              ),
+            }}
+          >
+            {String(msg.content ?? "")}
+          </ReactMarkdown>
           </div>
         </div>
 
