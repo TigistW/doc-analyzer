@@ -52,13 +52,13 @@ export default function SignIn() {
     <div className="min-h-screen bg-white transition-colors">
       <div className="flex min-h-screen">
         {/* Left side */}
-        <div className="hidden md:flex w-1/2 flex-col justify-between p-6">
+        <div className="hidden md:flex w-1/2 flex-col justify-between items-center p-6">
             <h1 className="ml-10 text-2xl font-semibold text-gray-900 dark:text-black">
             eAMR Connect
             </h1>
 
           <div className="flex flex-col items-center justify-center flex-grow">
-            <div className="w-[550px] h-[650px] relative rounded-2xl overflow-hidden shadow-md">
+            <div className="w-[500px] h-[600px] relative rounded-2xl overflow-hidden shadow-md">
               <Image
                 src="/Group.png"
                 alt="Illustration"
@@ -76,7 +76,7 @@ export default function SignIn() {
         {/* Right side */}
         <div className="flex w-full md:w-1/2 flex-col justify-between px-8 py-6">
           {/* Top Right Icons */}
-          <div className="flex justify-end space-x-3">
+          {/* <div className="flex justify-end space-x-3">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 transition"
@@ -94,7 +94,7 @@ export default function SignIn() {
               className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 cursor-pointer"
             />
             </button>
-          </div>
+          </div> */}
 
           {/* Form */}
           <div className="flex flex-col items-center justify-center flex-grow">

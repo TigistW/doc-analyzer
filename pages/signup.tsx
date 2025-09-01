@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { profile } from "console";
 import SvgIcon from "@/components/Core/SvgIcon";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -16,15 +19,37 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [showTosModal, setShowTosModal] = useState(false);
+  const [tosContent, setTosContent] = useState("");
+  const [privacyContent, setPrivacyContent] = useState("");
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const { theme, setTheme } = useTheme();
+
   const router = useRouter();
+  
+  useEffect(() => {
+    fetch("/terms-of-service.md")
+      .then((res) => res.text())
+      .then((text) => setTosContent(text));
+
+    fetch("/privacy-policy.md")
+      .then((res) => res.text())
+      .then((text) => setPrivacyContent(text));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
+
+    if (!agreed) {
+      setError("You must agree to the Terms of Service and Privacy Policy");
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -57,13 +82,13 @@ export default function SignUp() {
     <div className="min-h-screen bg-white transition-colors">
       <div className="flex min-h-screen">
         {/* Left side */}
-        <div className="hidden md:flex w-1/2 flex-col justify-between p-6">
+        <div className="hidden md:flex w-1/2 flex-col justify-between items-center p-6">
           <h1 className="ml-10 text-2xl font-semibold text-gray-900">
             eAMR Connect
           </h1>
 
           <div className="flex flex-col items-center justify-center flex-grow">
-            <div className="w-[550px] h-[650px] relative rounded-2xl overflow-hidden shadow-md">
+            <div className="w-[500px] h-[600px] relative rounded-2xl overflow-hidden shadow-md">
               <Image
                 src="/Group.png"
                 alt="Illustration"
@@ -81,7 +106,7 @@ export default function SignUp() {
         {/* Right side */}
         <div className="flex w-full md:w-1/2 flex-col justify-between px-8 py-6">
           {/* Top Right Icons */}
-          <div className="flex justify-end space-x-3">
+          {/* <div className="flex justify-end space-x-3">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 rounded-full bg-gray-100 transition"
@@ -99,7 +124,7 @@ export default function SignUp() {
               className="p-2 rounded-full bg-gray-100 cursor-pointer"
             />
             </button>
-          </div>
+          </div> */}
 
           {/* Form */}
           <div className="flex flex-col items-center justify-center flex-grow">
@@ -155,6 +180,32 @@ export default function SignUp() {
                   className="w-full px-4 py-3 border rounded-md bg-gray-100 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
+                <div className="flex items-center space-x-2 text-sm">
+                  <input
+                    type="checkbox"
+                    id="agree"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="agree" className="text-gray-700">
+                    I have read and agree to the{" "}
+                    <span
+                      className="text-blue-500 hover:underline cursor-pointer"
+                      onClick={() => setShowTosModal(true)}
+                    >
+                      Terms of Service
+                    </span>{" "}
+                    and{" "}
+                    <span
+                      className="text-blue-500 hover:underline cursor-pointer"
+                      onClick={() => setShowPrivacy(true)}
+                    >
+                      Privacy Policy
+                    </span>
+                  </label>
+                </div>
+
                 <button
                   type="submit"
                   disabled={loading}
@@ -163,6 +214,30 @@ export default function SignUp() {
                   {loading ? "Signing up..." : "Sign Up"}
                 </button>
               </form>
+
+              {(showTosModal || showPrivacy) && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white w-96 p-6 rounded-2xl shadow-lg overflow-y-auto max-h-[80vh]">
+                      <h3 className="text-lg font-semibold mb-4 text-gray-900">
+                        {showTosModal ? "Terms of Service" : "Privacy Policy"}
+                      </h3>
+                      <div className="text-sm text-gray-700 space-y-2">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {showTosModal ? tosContent : privacyContent}
+                        </ReactMarkdown>
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <button
+                          onClick={() => { setShowTosModal(false); setShowPrivacy(false); }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
 
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               {success && (

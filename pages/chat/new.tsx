@@ -42,21 +42,18 @@ export default function NewChatPage() {
   const [showExamples, setShowExamples] = useState(true);
   const [conversationCount, setConversationCount] = useState(0);
   const [selectedModel, setSelectedModel] = useState("gemini");
+  const [loading, setLoading] = useState(false); // for progress indicator
+  const abortControllerRef = useRef<AbortController | null>(null); // for cancelling requests
+  const [assistantTyping, setAssistantTyping] = useState(false); // new: for chat placeholder
+
 
   const models = [
-    {
-      id: "llama",
-      name: "LLaMA",
-      icon: "✨",
-      activeColor: "bg-purple-200 text-black",
-      inactiveColor: "bg-purple-200 text-purple-600",
-    },
     {
       id: "gemini",
       name: "Gemini",
       icon: "⚡",
       activeColor: "bg-blue-300 text-black",
-      inactiveColor: "bg-blue-200 text-blue-600",
+      inactiveColor: "bg-blue-100 text-blue-600",
     },
   ];
 
@@ -284,6 +281,12 @@ const handleSend = async () => {
     })();
   }
 
+    // Start loading + setup abort controller
+  setLoading(true);
+  setAssistantTyping(true);
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
+
   // -------- Step 3: Send user message to backend and append reply --------
   try {
     const token = localStorage.getItem("access_token");
@@ -295,17 +298,26 @@ const handleSend = async () => {
       conversationId,
       selectedModel: selectedModel,   // <-- send model info
     }),
+    signal: controller.signal, // attach signal for aborting 
     });
     const data = await res.json();
     const assistantMessage = { id: Date.now().toString(), role: "model" as const, content: data.reply as string};
 
     setMessages(prev => [...prev, assistantMessage]);
 
-  } catch (err) {
-    console.error("Error sending message:", err);
+  } catch (err: any) {
+    if (err.name === "AbortError") {
+      console.log("Query canceled by user");
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: "model", content: "*Query canceled*" }]);
+    } else {
+      console.error("Error sending message:", err);
+    }
+  } finally {
+    setLoading(false);
+    setAssistantTyping(false);
+    abortControllerRef.current = null;
   }
 };
-
 
   return (
     <div className="flex min-h-screen bg-white text-gray-800">
@@ -348,28 +360,32 @@ const handleSend = async () => {
       </ul>
     </div>
 
-      {/* User profile bottom */}
-      <div className="mb-8 px-4 py-2 bg-white rounded-full flex items-center justify-between shadow-sm">
-      {/* Left: avatar + name */}
+    {/* User profile bottom */}
+    <div className="mb-8 px-4 py-3 ml-2 mr-2 bg-white rounded-lg p-4 flex flex-col justify-between h-28 shadow-sm">
+      {/* Top: avatar + name */}
       <div className="flex items-center gap-3">
         <img
-              src={user?.avatar || "/Group.png"}
-              alt="User Avatar"
-              className="w-6 h-6 rounded-full object-cover"
-            />
-            <span className="text-sm font-semibold text-gray-800">
-              {user?.name || "Loading..."}
-            </span>
+          src={user?.avatar || "/Group.png"}
+          alt="User Avatar"
+          className="w-10 h-10 rounded-full object-cover"
+        />
+        <span className="text-sm font-semibold text-gray-800">
+          {user?.name || "Loading..."}
+        </span>
       </div>
 
-      {/* Right: logout button */}
+      {/* Bottom: logout button */}
       <button
-            onClick={handleLogout}
-            className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition"
-          >
+        onClick={handleLogout}
+        className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-300 hover:bg-gray-200 transition self-start"
+      >
         <SvgIcon src="/Icon.svg" size={16} />
+        <span className="text-sm font-medium text-gray-800">Logout</span>
       </button>
     </div>
+
+
+
 </aside>
 
       {/* Main Content */}
@@ -380,8 +396,8 @@ const handleSend = async () => {
           <h2 className="text-xl font-semibold"></h2>
           
           <div className="flex items-center gap-4 bg-white shadow-md px-5 py-2 rounded-full">
-                <SvgIcon src="/Icon.svg" size={20} />
-               <SvgIcon src="/Icon.svg" size={20} />
+                {/* <SvgIcon src="/Icon.svg" size={20} />
+               <SvgIcon src="/Icon.svg" size={20} /> */}
 
                 {/* User avatar */}
                 <img
@@ -534,6 +550,17 @@ const handleSend = async () => {
       </div>
     ))
   )}
+   {/* Show "model is typing..." bubble */}
+  {assistantTyping && (
+    <div className="flex justify-start animate-pulse">
+      <div className="flex-shrink-0">
+        <img src={selectedModel === "gemini" ? "/Icon.svg" : "/Group.png"} alt="typing" className="w-8 h-8 rounded-full" />
+      </div>
+      <div className="px-4 py-3 rounded-2xl max-w-3xl bg-gray-100 text-gray-600">
+        Typing...                                 
+      </div>
+    </div>
+  )}
   <div ref={endOfMessagesRef} className="h-20" />
 </div>
 
@@ -549,17 +576,34 @@ const handleSend = async () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-              />
-              <button 
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              disabled={loading} // optional: disable input while loading
+            />
+              {/* <button 
               onClick={handleSend}
               className="px-3 py-2 bg-blue-600 text-white text-base font-medium rounded-full shadow hover:bg-blue-700">
                 Submit
+              </button> */}
+             <button
+              onClick={handleSend}
+              className="px-3 py-2 bg-blue-600 text-white text-base font-medium rounded-full shadow hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              disabled={loading} // disable while loading
+            >
+              Submit
+            </button>
+
+            {loading && (
+              <button
+                onClick={() => abortControllerRef.current?.abort()}
+                className="px-3 py-2 bg-red-500 text-white text-base font-medium rounded-full shadow hover:bg-red-600"
+              >
+                Cancel
               </button>
+            )}
             </div>
           </div>
 

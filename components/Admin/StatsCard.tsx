@@ -12,7 +12,7 @@ type StatsCardProps = {
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon, trend, status }) => {
   return (
-    <div className="bg-gray-200 p-4 rounded-2xl shadow flex flex-col gap-3 w-full hover:shadow-md transition-shadow">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl shadow flex flex-col gap-3 w-full hover:shadow-md transition-shadow">
       {/* Title & Icon */}
       <div className="flex items-center gap-2">
     {icon && <div className="text-gray-800"><>{icon}</></div>}

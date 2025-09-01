@@ -32,6 +32,10 @@ export default function Sidebar() {
           <SvgIcon src="/Icon.svg" size={18} />
           <span>User Management</span>
         </Link>
+        <Link href="/admin/scraper-management-page" className={linkClasses("/admin/scraper-management-page")}>
+          <SvgIcon src="/Icon.svg" size={18} />
+          <span>Scraper Management</span>
+        </Link>
       </div>
 
       {/* Bottom user card */}
