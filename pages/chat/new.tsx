@@ -45,6 +45,7 @@ export default function NewChatPage() {
   const [loading, setLoading] = useState(false); // for progress indicator
   const abortControllerRef = useRef<AbortController | null>(null); // for cancelling requests
   const [assistantTyping, setAssistantTyping] = useState(false); // new: for chat placeholder
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
 
   const models = [
@@ -322,10 +323,20 @@ const handleSend = async () => {
   return (
     <div className="flex min-h-screen bg-white text-gray-800">
       {/* Sidebar */}
-<aside className="w-52 bg-gray-200 flex flex-col mt-3 ml-5 mb-8 rounded-lg shadow-lg fixed top-0 left-0 bottom-0 h-screen">
+<aside
+  className={`${
+    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+  } md:translate-x-0 transition-transform duration-300 fixed top-0 left-0 bottom-0 w-64 bg-gray-200 flex flex-col mt-3 ml-5 mb-8 rounded-lg shadow-lg h-screen z-40`}
+>
   {/* Logo/Header */}
   <div className="p-4 flex justify-center mt-4">
-      <h1 className="text-xl font-bold text-gray-800">eAMR Chat</h1>
+      <h1 className="text-xl font-bold text-gray-800">eAMR Chat     </h1>
+      <button
+      className="md:hidden text-gray-600 ml-6"
+      onClick={() => setSidebarOpen(false)}
+    >
+    ✖
+  </button>
     </div>
 
   {/* New chat + search */}
@@ -387,12 +398,28 @@ const handleSend = async () => {
 
 
 </aside>
+{/* Mobile hamburger button */}
+<div className="md:hidden fixed top-3 left-3 z-50">
+  <button
+    className="p-2 bg-gray-200 rounded-md shadow"
+    onClick={() => setSidebarOpen(true)}
+  >
+    ☰
+  </button>
+</div>
 
       {/* Main Content */}
   
-<main className="flex-1 flex flex-col ml-60 mr-4 mt-3 mb-8">
+{/* <main className="flex-1 flex flex-col ml-60 mr-4 mt-3 mb-8"> */}
+  {/* <main className="flex-1 flex flex-col mt-3 mb-8 ml-0 md:ml-60 mr-0 md:mr-4 transition-all">
+   */}
+   <main className="flex-1 flex flex-col mt-3 mb-8 ml-0 md:ml-60 mr-0 md:mr-4 transition-all">
+
+
         {/* Header */}
-        <div className="flex justify-between items-center px-6 py-2 fixed top-0 left-60 right-4 bg-white z-10">
+        {/* <div className="flex justify-between items-center px-6 py-2 fixed top-0 left-60 right-4 bg-white z-10"> */}
+          <div className="flex justify-between items-center px-4 py-2 fixed top-0 left-0 md:left-60 right-0 md:right-4 bg-white z-10 transition-all">
+
           <h2 className="text-xl font-semibold"></h2>
           
           <div className="flex items-center gap-4 bg-white shadow-md px-5 py-2 rounded-full">
@@ -440,9 +467,13 @@ const handleSend = async () => {
 
           {/* Three Columns */}
          {/* Chat messages */}
-<div 
+{/* <div 
   ref={chatContainerRef}
   className="flex-1 overflow-y-auto scroller-hide px-10 py-6 space-y-6 mt-28"
+> */}
+<div 
+  ref={chatContainerRef}
+  className="flex-1 overflow-y-auto scroller-hide px-4 md:px-10 py-6 space-y-6 mt-28"
 >
   {messages.length === 0 ? (
     showExamples ? (
@@ -518,7 +549,7 @@ const handleSend = async () => {
           </div>
         )}
 
-        <div
+        {/* <div
           className={`px-4 py-3 rounded-2xl max-w-3xl ${
             msg.role === "user"
               ? "bg-white text-black text-right"
@@ -530,7 +561,19 @@ const handleSend = async () => {
             marginLeft: msg.role === "model" ? "0px" : undefined,
             marginRight: msg.role === "user" ? "0px" : undefined,
           }}
-        >
+        > */}
+        <div
+      className={`px-4 py-3 rounded-2xl max-w-full md:max-w-3xl ${
+        msg.role === "user"
+          ? "bg-white text-black text-right"
+          : "bg-white text-gray-800 text-left"
+      }`}
+      style={{
+        height: "auto",
+        marginLeft: msg.role === "model" ? "0px" : undefined,
+        marginRight: msg.role === "user" ? "0px" : undefined,
+      }}
+    >
           <div className="prose prose-sm max-w-none">
             {/* <ReactMarkdown remarkPlugins={[remarkGfm] as PluggableList}>
               {String(msg.content ?? "")}
@@ -582,7 +625,12 @@ const handleSend = async () => {
         
 
         {/* Input Area */}
-          <div className="fixed bottom-6 left-72 right-24 bg-white p-1">
+          {/* <div className="fixed bottom-6 left-72 right-24 bg-white p-1">
+           */}
+           {/* <div className="fixed bottom-6 left-2 right-2 md:left-72 md:right-24 bg-white p-1"> */}
+           <div className="fixed bottom-16 left-2 right-2 md:left-72 md:right-24 bg-white p-1 z-20">
+
+
             <div className="flex items-center gap-3 w-full">
               <input
                 type="text"
@@ -644,3 +692,5 @@ const handleSend = async () => {
     </div>
   );
 }
+
+
