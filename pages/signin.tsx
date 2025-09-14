@@ -58,9 +58,9 @@ export default function SignIn() {
             </h1>
 
           <div className="flex flex-col items-center justify-center flex-grow">
-            <div className="w-[500px] h-[600px] relative rounded-2xl overflow-hidden shadow-md">
+            <div className="w-[400px] h-[400px] relative rounded-2xl overflow-hidden">
               <Image
-                src="/Group.png"
+                src="/Logo.svg"
                 alt="Illustration"
                 fill
                 className="object-cover"

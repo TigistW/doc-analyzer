@@ -420,7 +420,7 @@ const handleSend = async () => {
         {/* <div className="flex justify-between items-center px-6 py-2 fixed top-0 left-60 right-4 bg-white z-10"> */}
           <div className="flex justify-between items-center px-4 py-2 fixed top-0 left-0 md:left-60 right-0 md:right-4 bg-white z-10 transition-all">
 
-          <h2 className="text-xl font-semibold"></h2>
+          {/* <h2 className="text-xl font-semibold">hh</h2> */}
           
           <div className="flex items-center gap-4 bg-white shadow-md px-5 py-2 rounded-full">
                 {/* <SvgIcon src="/Icon.svg" size={20} />
@@ -621,72 +621,41 @@ const handleSend = async () => {
   )}
   <div ref={endOfMessagesRef} className="h-20" />
 </div>
-
-        
-
-        {/* Input Area */}
-          {/* <div className="fixed bottom-6 left-72 right-24 bg-white p-1">
-           */}
-           {/* <div className="fixed bottom-6 left-2 right-2 md:left-72 md:right-24 bg-white p-1"> */}
-           <div className="fixed bottom-16 left-2 right-2 md:left-72 md:right-24 bg-white p-1 z-20">
-
-
-            <div className="flex items-center gap-3 w-full">
-              <input
-                type="text"
-                placeholder="Ask a question..."
-                className="flex-grow px-3 py-4 text-sm bg-gray-200 border border-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
+          {/* Input Area */}
+        <div className="fixed bottom-0 left-2 right-2 md:left-72 md:right-24 bg-white p-3 z-20">
+          <div className="flex items-center gap-3 w-full">
+            <input
+              type="text"
+              placeholder="Ask a question..."
+              className="flex-grow px-4 py-3 text-base bg-gray-100 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   handleSend();
                 }
               }}
-              disabled={loading} // optional: disable input while loading
+              disabled={loading}
             />
-              {/* <button 
+            <button
               onClick={handleSend}
-              className="px-3 py-2 bg-blue-600 text-white text-base font-medium rounded-full shadow hover:bg-blue-700">
-                Submit
-              </button> */}
-             <button
-              onClick={handleSend}
-              className="px-3 py-2 bg-blue-600 text-white text-base font-medium rounded-full shadow hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              disabled={loading} // disable while loading
+              className="px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-full shadow hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              disabled={loading}
             >
               Submit
             </button>
-
             {loading && (
               <button
                 onClick={() => abortControllerRef.current?.abort()}
-                className="px-3 py-2 bg-red-500 text-white text-base font-medium rounded-full shadow hover:bg-red-600"
+                className="px-4 py-3 bg-red-500 text-white text-sm font-medium rounded-full shadow hover:bg-red-600"
               >
                 Cancel
               </button>
             )}
-            </div>
           </div>
-
+        </div>
           </main>
-
-          {/* Footer */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white shadow-sm">
-            <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-xs text-gray-500">
-              {/* Left: copyright */}
-              <span>© 2025 eAMR Connect. All Rights Reserved.</span>
-
-              {/* Right: links */}
-              <div className="flex gap-6">
-                <a href="#" className="hover:text-gray-800 transition">Home</a>
-                <a href="#" className="hover:text-gray-800 transition">License</a>
-                <a href="#" className="hover:text-gray-800 transition">Terms of Use</a>
-                <a href="#" className="hover:text-gray-800 transition">Privacy Policy</a>
-              </div>
-            </div>
-          </div>
           </div>
       </main>
     </div>
